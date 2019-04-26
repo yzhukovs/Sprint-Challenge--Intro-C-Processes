@@ -5,12 +5,13 @@
 #include <sys/stat.h>
 #include <sys/errno.h>
 
+
 /**
  * Main
  */
 int main(int argc, char **argv)
 {
-   char *path = argv[1];
+    char *path = argv[1];
     
     
     if (argc < 2) {
@@ -37,18 +38,21 @@ int main(int argc, char **argv)
             fprintf(stderr, "error: '%s': %s\n", file_path, strerror(errno));
             exit(1);
         } else {
-            long long file_size = buf.st_size ;
-            printf("%10lld", file_size);
-            printf("\t%s\n", ent->d_name);
+            if (S_ISDIR(buf.st_mode)) {
+                printf("<DIR>  %s\n", ent->d_name);
+            } else {
+                long long file_size = buf.st_size ;
+                printf("%lld", file_size);
+                printf("\t%s\n", ent->d_name);
+            }
             ent = readdir(dir);
         }
     }
-    
     
     // Close directory
     closedir(dir);
     
     
     return 0;
- 
+    
 }
