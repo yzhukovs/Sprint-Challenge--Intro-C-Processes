@@ -3,47 +3,45 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/errno.h>
 
 /**
  * Main
  */
 int main(int argc, char **argv)
 {
-     // Parse command line
-    if (argc < 2)
-    {
-        fprintf(stderr, "please enter directory path\n");
-        exit(1);
+   char *path = argv[1];
+    
+    
+    if (argc < 2) {
+        path = ".";
     }
-    
-    char *path = argv[1];
-    
-    // Open directory
     
     DIR *dir = opendir(path);
     
     if (dir == NULL)
     {
-        fprintf(stdout, "can't open this directory\n");
+        fprintf(stderr, "error: '%s': can't open this directory: %s\n", path, strerror(errno));
         exit(1);
     }
-    
-    // Repeatly read and print entries
     
     struct dirent *ent = readdir(dir);
     
     
     while (ent != NULL)
     {
-        char path[100];
-        sprintf(path, "%s/%s", argv[1], ent->d_name);
+        char file_path[100];
+        sprintf(file_path, "%s/%s", path, ent->d_name);
         struct stat buf;
-        //stat(path, &buf);
-        long long file_size = buf.st_size ;
-        int correct = stat(path, &buf);
-        correct != -1 ? printf("file size is %10lld", file_size) : printf(" ");
-        printf("\t%s\n", ent->d_name);
-        ent = readdir(dir);
+        if (stat(file_path, &buf) == -1) {
+            fprintf(stderr, "error: '%s': %s\n", file_path, strerror(errno));
+            exit(1);
+        } else {
+            long long file_size = buf.st_size ;
+            printf("%10lld", file_size);
+            printf("\t%s\n", ent->d_name);
+            ent = readdir(dir);
+        }
     }
     
     
